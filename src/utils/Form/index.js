@@ -2,85 +2,62 @@ import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import TextField from '../TextField'
 import SelectField from '../SelectField'
+import NumberField from '../NumberField'
 import UsernameField from '../UsernameField'
 import EmailField from '../EmailField'
 import PasswordField from '../PasswordField'
+import DatePicker from '../DatePicker'
+import TimePicker from '../TimePicker'
 import RaisedButton from 'material-ui/RaisedButton'
-const FormItems = ({type, name = '', min = 0, max = 0, fullWidth = true, isRequired = false, validation = true, floatingLabel = '', handleChange, handleKeyUp, modelValue, defaultValue, options = []}) => {
+const FormItems = ({type, ...props}) => {
+// const FormItems = ({type, name = '', min = 0, max = 0, fullWidth = true, isRequired = false, validation = true, floatingLabel = '', handleChange, handleKeyUp, modelValue, defaultValue, options = [], mode = '', minDate = {}, maxDate={}}) => {
   if (type === 'text') {
     return (
       <TextField
-        name={name}
-        min={min}
-        max={max}
-        fullWidth={fullWidth}
-        isRequired={isRequired}
-        floatingLabel={floatingLabel}
-        handleChange={handleChange}
-        handleKeyUp={handleKeyUp}
-        modelValue={modelValue}
-        defaultValue={defaultValue}
-        validation={validation}
+        {...props}
       />
     )
   } else if (type === 'username') {
     return (
       <UsernameField
-        name={name}
-        min={min}
-        max={max}
-        fullWidth={fullWidth}
-        isRequired={isRequired}
-        floatingLabel={floatingLabel}
-        handleChange={handleChange}
-        handleKeyUp={handleKeyUp}
-        modelValue={modelValue}
-        defaultValue={defaultValue}
-        validation={validation}
+        {...props}
+      />
+    )
+  } else if (type === 'number') {
+    return (
+      <NumberField
+        {...props}
       />
     )
   } else if (type === 'email') {
     return (
       <EmailField
-        name={name}
-        min={min}
-        max={max}
-        fullWidth={fullWidth}
-        isRequired={isRequired}
-        floatingLabel={floatingLabel}
-        handleChange={handleChange}
-        handleKeyUp={handleKeyUp}
-        modelValue={modelValue}
-        defaultValue={defaultValue}
-        validation={validation}
+      {...props}
+
       />
     )
   } else if (type === 'password') {
     return (
       <PasswordField
-        name={name}
-        fullWidth={fullWidth}
-        isRequired={isRequired}
-        floatingLabel={floatingLabel}
-        handleChange={handleChange}
-        handleKeyUp={handleKeyUp}
-        modelValue={modelValue}
-        defaultValue={defaultValue}
-        validation={validation}
+      {...props}
       />
     )
   } else if (type === 'select') {
     return (
       <SelectField
-        name={name}
-        fullWidth={fullWidth}
-        isRequired={isRequired}
-        floatingLabel={floatingLabel}
-        handleChange={handleChange}
-        modelValue={modelValue}
-        defaultValue={defaultValue}
-        validation={validation}
-        options={options}
+        {...props}
+      />
+    )
+  } else if (type === 'datepicker') {
+    return (
+      <DatePicker
+        {...props}
+      />
+    )
+  } else if (type === 'timepicker') {
+    return (
+      <TimePicker
+        {...props}
       />
     )
   }
@@ -99,6 +76,7 @@ class CustomForm extends Component {
       formButtonShow: (this.props.formButtonShow !== undefined) ? this.props.formButtonShow : true,
       validationStatus: false
     }
+    this.DEFAULT_COL_SIZE = 12
   }
   handleChange = (obj) => {
     this.setState({
@@ -170,38 +148,40 @@ class CustomForm extends Component {
   //   return false
   // }
   render () {
+    const pullRight = this.props.pullButtonsRight ? 'justify-content-end' : ''
     return (
       <form>
+        <div className='row'>
         {
           this.props.data.map((el, ind) => {
-            return <FormItems
-              key={ind}
-              defaultValue={el.defaultValue}
-              name={el.name}
-              type={el.type}
-              min={el.min}
-              max={el.max}
-              fullWidth={true}
-              floatingLabel={el.floatingLabel}
-              handleChange={this.handleChange}
-              handleKeyUp={this.handleKeyUp}
-              modelValue={el.modelValue}
-              validation={el.validation}
-              options={el.options}
-            />
+            return (
+              <div className={`col-md-${el.colSize || this.DEFAULT_COL_SIZE}`} key={ind}>
+                  <FormItems
+                    {...el}
+                    fullWidth={true}
+                    handleChange={this.handleChange}
+                    handleKeyUp={this.handleKeyUp}
+              />
+              </div>
+            )
           })
         }
-        {this.props.handleBackButton ? <RaisedButton
-          style={{marginRight: 12}}
-          label={'Back'}
-          onClick={this.props.handleBackButton}
-        /> : ''}
-        <RaisedButton
-          style={this.handleFormButtonDisplay()}
-          disabled={this.state.validationStatus}
-          label={this.state.formButton.label}
-          onClick={this.handleSubmit}
-        />
+        </div>
+        <div className={`row ${pullRight}`}>
+          <div className='4'>
+            {this.props.handleBackButton ? <RaisedButton
+            style={{marginRight: 12}}
+            label={'Back'}
+            onClick={this.props.handleBackButton}
+          /> : ''}
+          <RaisedButton
+            style={this.handleFormButtonDisplay()}
+            disabled={this.state.validationStatus}
+            label={this.state.formButton.label}
+            onClick={this.handleSubmit}
+          />
+          </div>
+        </div>
       </form>
     )
   }
@@ -213,6 +193,7 @@ CustomForm.propTypes = {
   handleBackButton: PropTypes.func,
   data: PropTypes.array.isRequired,
   formButtonShow: PropTypes.bool,
+  pullButtonsRight: PropTypes.bool,
   formButton: PropTypes.shape({
     label: PropTypes.string.isRequired,
     status: PropTypes.bool.isRequired

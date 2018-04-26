@@ -79,9 +79,9 @@ class CTextField extends React.Component {
         return false
       },
       keyup: (ev, e) => {
-        if (this.props.handleKeyUp) {
-          this.props.handleKeyUp(ev.keyCode)
-        }
+        // if (this.props.handleKeyUp) {
+        //   this.props.handleKeyUp(ev.keyCode)
+        // }
       }
     }
   }
@@ -98,6 +98,11 @@ class CTextField extends React.Component {
           onChange={this.handle.change}
           value={this.state.modelValue}
           onKeyUp={this.handle.keyup}
+          disabled={this.props.disabled}
+          style={this.props.style}
+          rows={this.props.rows || 1}
+          multiLine={this.props.multiLine || false}
+          rowsMax={this.props.maxRows || 1}
         />
       </div>
     )
@@ -114,6 +119,11 @@ CTextField.propTypes = {
   max: PropTypes.number,
   isRequired: PropTypes.bool,
   name: PropTypes.string.isRequired,
-  modelValue: PropTypes.string
+  modelValue: PropTypes.string,
+  disabled: PropTypes.bool,
+  style: PropTypes.object,
+  rows: PropTypes.number,
+  maxRows: PropTypes.number,
+  multiLine: PropTypes.bool,
 }
 export default CTextField

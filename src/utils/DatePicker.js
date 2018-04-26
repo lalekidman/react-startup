@@ -1,34 +1,20 @@
 import React from 'react'
-import TextField from 'material-ui/TextField'
+import DatePickers from 'material-ui/DatePicker'
 import PropTypes from 'prop-types'
-class CEmailField extends React.Component {
+class DatePicker extends React.Component {
   constructor (props) {
     super(props)
     this.state = {
       error: '',
       fullWidth: props.fullWidth || false,
-      value: props.defaultValue || '',
-      modelValue: props.modelValue || ''
+      value: props.defaultValue || ''
     }
   }
   setChanges (props) {
-    this.handle.change({
-      target: {
-        name: props.name,
-        value: props.modelValue || ''
-      }
-    })
+    this.handle.change(this, props.modelValue || new Date())
   }
   componentDidMount () {
-    if (this.props.modelValue) {
-      this.setChanges(this.props)
-    } else {
-      this.callback({
-        valid: false,
-        value: this.state.value,
-        name: this.props.name
-      })
-    }
+    this.setChanges(this.props)
   }
   componentWillReceiveProps (newProps) {
     if (typeof newProps.modelValue !== 'undefined') {
@@ -49,24 +35,12 @@ class CEmailField extends React.Component {
   }
   get handle () {
     return {
-      change: (ev) => {
-        let val = ev.target.value
+      change: (ev, val) => {
         this.setState({
           modelValue: val
         })
-        let spaces = /\s/g
-        let emailSign = /@{1}/g
-        let emailPatt = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/g
-        let emailSignRes = val.match(emailSign)
-        let emailPattRes = val.match(emailPatt)
         if (!val && this.props.isRequired) {
           this.setError(`${this.props.floatingLabel} is Required.`)
-        } else if (val.match(spaces)) {
-          this.setError(`${this.props.floatingLabel} must not contain any spaces.`)
-        } else if (!emailSignRes || emailSignRes.length > 1) {
-          this.setError(`${this.props.floatingLabel} must contain only one(1) \`@\` sign.`)
-        } else if (!emailPattRes) {
-          this.setError(`${this.props.floatingLabel} is invalid email address.`)
         } else {
           this.setState({
             error: ''
@@ -74,14 +48,14 @@ class CEmailField extends React.Component {
           this.callback({
             valid: true,
             value: val,
-            name: ev.target.name
+            name: this.props.name
           })
           return true
         }
         this.callback({
           valid: false,
           value: '',
-          name: ev.target.name
+          name: this.props.name
         })
         return false
       },
@@ -95,32 +69,34 @@ class CEmailField extends React.Component {
   render () {
     return (
       <div>
-        <TextField
-          hintText={this.props.placeholder}
-          floatingLabelText={this.props.floatingLabel}
-          // defaultValue={`${this.props.defaultValue}`}
+        <DatePickers
+          hintText={this.props.floatingLabel}
           name={this.props.name}
-          errorText={this.state.error}
           fullWidth={this.state.fullWidth}
           onChange={this.handle.change}
-          value={this.state.modelValue}
           onKeyUp={this.handle.keyup}
-          disabled={this.props.disabled}
+          value={this.state.modelValue}
+          style={this.props.style}
+          minDate={this.props.minDate}
+          maxDate={this.props.maxDate}
+          shouldDisableDate={this.props.disabledDate}
         />
       </div>
     )
   }
 }
-CEmailField.propTypes = {
+DatePicker.propTypes = {
   handleChange: PropTypes.func.isRequired,
-  handleKeyUp: PropTypes.func,
-  placeholder: PropTypes.string,
+  disabledDate: PropTypes.func,
   floatingLabel: PropTypes.string,
   value: PropTypes.string,
   fullWidth: PropTypes.bool,
   isRequired: PropTypes.bool,
   name: PropTypes.string.isRequired,
-  modelValue: PropTypes.string,
-  disabled: PropTypes.bool
+  mode: PropTypes.string,
+  minDate: PropTypes.object,
+  maxDate: PropTypes.object,
+  style: PropTypes.object,
+  modelValue: PropTypes.instanceOf(Date)
 }
-export default CEmailField
+export default DatePicker

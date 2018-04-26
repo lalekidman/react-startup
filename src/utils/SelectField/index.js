@@ -96,6 +96,7 @@ class CSelectField extends React.Component {
     return (
       <div>
         <SelectField
+          disabled={this.props.disabled}
           floatingLabelText={this.props.floatingLabel}
           name={this.props.name}
           onChange={this.handle.change}
@@ -116,6 +117,7 @@ CSelectField.propTypes = {
   fullWidth: PropTypes.bool,
   isRequired: PropTypes.bool,
   name: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
   modelValue: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number

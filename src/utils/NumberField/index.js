@@ -9,7 +9,7 @@ class NumberField extends React.Component {
       validation: (props.validation === undefined) ? true : props.validation,
       fullWidth: props.fullWidth || false,
       value: props.defaultValue || '',
-      modelValue: props.modelValue || '',
+      modelValue: props.modelValue || 0,
       min: props.min,
       max: props.max
     }
@@ -18,7 +18,7 @@ class NumberField extends React.Component {
     this.handle.change({
       target: {
         name: props.name,
-        value: props.modelValue || ''
+        value: props.modelValue || '0'
       }
     })
   }
@@ -28,7 +28,7 @@ class NumberField extends React.Component {
     } else {
       this.callback({
         valid: false,
-        value: this.state.value,
+        value: this.state.value || 0,
         name: this.props.name
       })
     }
@@ -36,6 +36,7 @@ class NumberField extends React.Component {
   componentWillReceiveProps (newProps) {
     if (typeof newProps.modelValue !== 'undefined') {
       if (this.props.modelValue !== newProps.modelValue) {
+        console.log('NEWPROPS: ', newProps)
         this.setChanges(newProps)
       }
     }
@@ -62,29 +63,30 @@ class NumberField extends React.Component {
         if (this.state.validation) {
           if (!val && this.props.isRequired) {
             this.setError(`${this.props.floatingLabel} is Required.`)
-          } else if (val.match(spaces)) {
-            this.setError(`${this.props.floatingLabel} must not contain any spaces.`)
-          } else if (val.match(number)) {
-            this.setError(`${this.props.floatingLabel} must not contain any character/letter.`)
-          } else if (this.state.min && (val.length < this.state.min)) {
-            this.setError(`${this.props.floatingLabel} must be mininum length of ${this.state.min}.`)
-          } else if (this.state.max && (val.length > this.state.max)) {
-            this.setError(`${this.props.floatingLabel} must be maxinum length of ${this.state.max}.`)
           } else {
-            this.setState({
-              error: ''
-            })
-            
-            this.callback({
-              valid: true,
-              value: val ? parseInt(val) : 0,
-              name: ev.target.name
-            })
-            return true
+            if (val.match(spaces)) {
+              this.setError(`${this.props.floatingLabel} must not contain any spaces.`)
+            } else if (val.match(number)) {
+              this.setError(`${this.props.floatingLabel} must not contain any character/letter.`)
+            } else if (this.state.min && (val.length < this.state.min)) {
+              this.setError(`${this.props.floatingLabel} must be mininum length of ${this.state.min}.`)
+            } else if (this.state.max && (val.length > this.state.max)) {
+              this.setError(`${this.props.floatingLabel} must be maxinum length of ${this.state.max}.`)
+            } else {
+              this.setState({
+                error: ''
+              })
+              this.callback({
+                valid: true,
+                value: val ? parseFloat(val) : 0,
+                name: ev.target.name
+              })
+              return true
+            }
           }
           this.callback({
             valid: false,
-            value: '',
+            value: 0,
             name: ev.target.name
           })
         } else {
@@ -117,6 +119,7 @@ class NumberField extends React.Component {
           onChange={this.handle.change}
           value={this.state.modelValue}
           onKeyUp={this.handle.keyup}
+          style={this.props.style}
         />
       </div>
     )
@@ -133,7 +136,8 @@ NumberField.propTypes = {
   min: PropTypes.number,
   max: PropTypes.number,
   isRequired: PropTypes.bool,
+  style: PropTypes.object,
   name: PropTypes.string.isRequired,
-  modelValue: PropTypes.number
+  modelValue: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 }
 export default NumberField
