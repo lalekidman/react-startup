@@ -6,7 +6,6 @@ export default (props) => {
   return (
     <div>
       <TopNavigation />
-      {/* <LeftNavigation /> */}
       <div className='container'>
         <Router {...props} />
       </div>

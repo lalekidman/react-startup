@@ -1,0 +1,8 @@
+#notification-top{
+  position: fixed !important;
+  top: 25px !important;
+  left: 25%;
+  width: 50%;
+  text-align: center;
+  z-index: 1500;
+}

@@ -16,7 +16,21 @@ import createSagaMiddleware from 'redux-saga'
 import rootSaga from './redux/sagas'
 // import injectTapEventPlugin from 'react-tap-event-plugin'
 // injectTapEventPlugin()
-
+import 'font-awesome/css/font-awesome.min.css'
+import serviceAccount from './configs/service-account.json'
+import * as firebase from 'firebase'
+import * as $ from 'jquery'
+import 'bootstrap'
+// import 'tether'
+import 'popper.js'
+window.jQuery = window.$ = $
+require("firebase/firestore");
+const config = serviceAccount.testing
+// const config = serviceAccount.development
+firebase.initializeApp(config)
+const firestore = firebase.firestore();
+const settings = {timestampsInSnapshots: true};
+firestore.settings(settings);
 const sagaMiddleware = createSagaMiddleware()
 export const store = createStore(
   rootReducers,

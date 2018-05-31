@@ -1,0 +1,19 @@
+.btn-primary {
+  border-radius: 5px;
+  background-color: #FF6F43;
+  border: 1px solid #FF6F43;
+  box-shadow: 0 0 0 0 #FFA270, 0 4px 8px 0 rgba(255,111,67,0.4);
+  color: #fff
+}
+.btn-primary:hover {
+  background-color: rgb(255, 124, 85);
+  border: 1px solid #FF6F43;
+}
+.btn-primary:disabled {
+  background-color: rgb(255, 124, 85);
+  border: 1px solid #FF6F43;
+}
+.btn-primary:active {
+  background-color: rgb(255, 124, 85) !important;
+  border: 1px solid #FF6F43 !important;
+}
