@@ -5,15 +5,17 @@ import * as firebase from 'firebase'
 import TextDisplay from '../../utils/TextDisplay'
 import Fullscreen from "react-full-screen";
 import {DEFAULT_IMAGE_LOGO, SCREEN_MAX, SCREEN_MIN, KYOO_BG} from '../../utils/constants'
+import Logo from '../../images/Kyoo Logo.png'
 const GetItemList = (props) => {
-  const {min, max, bookingNo} = props
-  // const {currentServedQueue = {}, name = '', minCapacity = 0, maxCapacity = 0} = props || {}
-  // const {bookingNo = ''} = currentServedQueue
+  // const {min, max} = props
+  const {currentServedQueue = {}, name = '', minCapacity = 0, maxCapacity = 0} = props || {}
+  const {bookingNo = ''} = currentServedQueue
   return (
     <div className='row bookingList'>
       <div className='col-12'>
         {bookingNo ? <span className='bookingNo'>{bookingNo}</span> : <span className='bookingNo empty'>------</span>}<br/>
-        <span className='noOfSeats'>{checkCapacityLabel(min, max)} Seats</span>
+        {/* <span className='noOfSeats'>{checkCapacityLabel(minCapacity, maxCapacity)} Seats</span> */}
+        <span className='noOfSeats'>{name}</span>
       </div>
     </div>
   )
@@ -66,21 +68,24 @@ class Wrapper extends React.Component {
     const {id} = this.props.authentication.data
     const {itemList} = this.state
     const entityCol = this.db.collection('entity').doc(id)
-    this.unsubscribe = entityCol.collection('queue').onSnapshot((snap) => {
+    this.unsubscribe = entityCol.collection('queue').orderBy('createdAt').limit(4).onSnapshot((snap) => {
       let allBookingNums = []
       const data = snap.docs.map(el => (el.data()))
       this.setState({
-        bookingList: itemList.map((item, ind) => {
-          const bookings = data.filter((el, ind) => {
-            const {noOfSeats = 0} = el.currentServedQueue || {}
-            return ((item.min <= noOfSeats && item.max >= noOfSeats) || (item.last && noOfSeats >= item.min))
-          }).map(el => {
-            const {bookingNo = '', createdAt = 0} = el.currentServedQueue || {}
-            return {bookingNo, createdAt}
-          })
-          Object.assign(item, {bookingNo: bookings.length >= 1 ? bookings.sort((el1, el2) => (el2.createdAt - el1.createdAt))[0].bookingNo : '' })
-          return <GetItemList key={ind} {...item}/>
+        bookingList: data.map((queueGroup, ind) => {
+          return <GetItemList key={ind} {...queueGroup}/>
         })
+        // itemList.map((item, ind) => {
+        //   const bookings = data.filter((el, ind) => {
+        //     const {noOfSeats = 0} = el.currentServedQueue || {}
+        //     return ((item.min <= noOfSeats && item.max >= noOfSeats) || (item.last && noOfSeats >= item.min))
+        //   }).map(el => {
+        //     const {bookingNo = '', createdAt = 0} = el.currentServedQueue || {}
+        //     return {bookingNo, createdAt}
+        //   })
+        //   Object.assign(item, {bookingNo: bookings.length >= 1 ? bookings.sort((el1, el2) => (el2.createdAt - el1.createdAt))[0].bookingNo : '' })
+        //   return <GetItemList key={ind} {...item}/>
+        // })
       })
     })
     entityCol.collection('ads').onSnapshot((snap) => {
@@ -160,6 +165,9 @@ class Wrapper extends React.Component {
               <div className='queue-container'>
                   {bookingList}
               </div>
+              <div className='footer-logo'>
+                <img src={Logo}/>
+              </div>
             </div>
           </div>
           <div className='col-6 right-panel'>
@@ -168,6 +176,11 @@ class Wrapper extends React.Component {
               <button onClick={this.exitFullscreen} className='min-screen-btn'><img src={SCREEN_MIN}/></button>
             </div>
             <img src={adsImage} className = 'adsImage'/>
+            <div className='current-serving'>
+              <span className='current-serving-title'>Current Serving</span>
+              <span className='bookingNo'> {`D001`} </span>
+              <span className='current-serving-footer'>{`Window 3`}</span>
+            </div>
           </div>
         </div>
       </div>
