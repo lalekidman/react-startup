@@ -6,6 +6,7 @@ import TextDisplay from '../../utils/TextDisplay'
 import Fullscreen from "react-full-screen";
 import {DEFAULT_IMAGE_LOGO, SCREEN_MAX, SCREEN_MIN, KYOO_BG} from '../../utils/constants'
 import Logo from '../../images/Kyoo Logo.png'
+import $ from 'jquery'
 const GetItemList = (props) => {
   // const {min, max} = props
   const {currentServedQueue = {}, name = '', minCapacity = 0, maxCapacity = 0} = props || {}
@@ -57,9 +58,11 @@ class Wrapper extends React.Component {
           bookingNo: ''
         }
       ],
+      displayedQueue: {},
       bookingList: [],
       adsList: [],
       isFull: false,
+      indicators: [],
       adsImage: KYOO_BG
     }
     this.adsCounter = 0
@@ -68,24 +71,35 @@ class Wrapper extends React.Component {
     const {id} = this.props.authentication.data
     const {itemList} = this.state
     const entityCol = this.db.collection('entity').doc(id)
-    this.unsubscribe = entityCol.collection('queue').orderBy('createdAt').limit(4).onSnapshot((snap) => {
+    this.unsubscribe = entityCol.collection('queue').orderBy('createdAt').onSnapshot((snap) => {
       let allBookingNums = []
-      const data = snap.docs.map(el => (el.data()))
+      const data = snap.docs
+      const queueGroups = [[]]
+      for (let x = 0; x < data.length; x++) {
+        let QGLen = (queueGroups.length - 1)
+        if (queueGroups[QGLen].length >= 4) {
+          queueGroups.push([])
+          QGLen++
+        }
+        queueGroups[QGLen].push(data[x])
+      }
       this.setState({
-        bookingList: data.map((queueGroup, ind) => {
-          return <GetItemList key={ind} {...queueGroup}/>
+        bookingList: queueGroups.map((queueGroup, ind) => {
+          return (
+            <div className={`carousel-item ${ind === 0 ? 'active': ''}`} key={ind}>
+              <div className='queue-container'>
+                {queueGroup.map((queues, index) => {
+                  return <GetItemList key={index} {...queues.data()}/>
+                })}
+              </div>
+            </div>
+          )
+        }),
+        indicators: queueGroups.map((el, ind) => {
+          return (
+            <li data-target="#queue-group-list" data-slide-to={ind} key={ind} className={ind === 0? 'active' : ''}></li>
+          )
         })
-        // itemList.map((item, ind) => {
-        //   const bookings = data.filter((el, ind) => {
-        //     const {noOfSeats = 0} = el.currentServedQueue || {}
-        //     return ((item.min <= noOfSeats && item.max >= noOfSeats) || (item.last && noOfSeats >= item.min))
-        //   }).map(el => {
-        //     const {bookingNo = '', createdAt = 0} = el.currentServedQueue || {}
-        //     return {bookingNo, createdAt}
-        //   })
-        //   Object.assign(item, {bookingNo: bookings.length >= 1 ? bookings.sort((el1, el2) => (el2.createdAt - el1.createdAt))[0].bookingNo : '' })
-        //   return <GetItemList key={ind} {...item}/>
-        // })
       })
     })
     entityCol.collection('ads').onSnapshot((snap) => {
@@ -95,11 +109,20 @@ class Wrapper extends React.Component {
         this.handleAdsDisplay()
       })
     })
+    entityCol.onSnapshot((snap) => {
+      const {displayedQueue = {}} = snap.data()
+      this.setState({
+        displayedQueue
+      })
+    })
   }
   componentDidMount() {
     window.setInterval(() => {
       this.handleAdsDisplay() 
     }, 5000)
+    $('.carousel').carousel({
+      interval: 2000
+    })
   }
   componentWillUnmount () {
     this.unsubscribe()
@@ -145,7 +168,7 @@ class Wrapper extends React.Component {
 
   render () {
     const {avatarURL, name} = this.props.authentication.data
-    const {adsImage, bookingList} = this.state
+    const {adsImage, bookingList, displayedQueue, indicators} = this.state
     return (
       <div>
         <div className='row' id = 'wrapper'>
@@ -162,24 +185,31 @@ class Wrapper extends React.Component {
                   </div>
                 </div>
               </div>
-              <div className='queue-container'>
+              <div id="queue-group-list" className="carousel slide" data-ride="carousel">
+                <ol className="carousel-indicators">
+                  {indicators}
+                </ol>
+                <div className="carousel-inner">
                   {bookingList}
+                </div>
               </div>
               <div className='footer-logo'>
                 <img src={Logo}/>
               </div>
             </div>
           </div>
-          <div className='col-6 right-panel'>
-            <div className='full-screen-btn'>
-              <button onClick={this.handleFullScreenButton} className='btn btn-primary max-screen-btn'><img src={SCREEN_MAX}/> Full Screen</button>
-              <button onClick={this.exitFullscreen} className='min-screen-btn'><img src={SCREEN_MIN}/></button>
-            </div>
-            <img src={adsImage} className = 'adsImage'/>
-            <div className='current-serving'>
-              <span className='current-serving-title'>Current Serving</span>
-              <span className='bookingNo'> {`D001`} </span>
-              <span className='current-serving-footer'>{`Window 3`}</span>
+          <div className='col-6'>
+            <div className='right-panel'>
+              <div className='full-screen-btn'>
+                <button onClick={this.handleFullScreenButton} className='btn btn-primary max-screen-btn'><img src={SCREEN_MAX}/> Full Screen</button>
+                <button onClick={this.exitFullscreen} className='min-screen-btn'><img src={SCREEN_MIN}/></button>
+              </div>
+              <img src={adsImage} className = 'adsImage'/>
+              < div className='current-serving'>
+                <span className='current-serving-title'>Current Serving</span>
+                <span className='bookingNo'> {displayedQueue.bookingNo || '------'} </span>
+                <span className='current-serving-footer'>{displayedQueue.queueGroupName || '------'}</span>
+              </div>
             </div>
           </div>
         </div>
