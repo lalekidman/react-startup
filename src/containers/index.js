@@ -38,7 +38,6 @@ class Wrapper extends React.Component {
     auth.onAuthStateChanged((firebaseUser) => {
       if (firebaseUser) {
         const {email} = firebaseUser
-        console.log('QWERTY: ', firebaseUser)
         if (firebaseUser.emailVerified) {
           db.collection('entity')
             .where('email', '==', email)
@@ -71,7 +70,7 @@ class Wrapper extends React.Component {
           throw new Error('User not verified')
         }
       } else {
-        this.props.authenticateUserFailed('User not authenticated')
+        this.props.authenticateUserFailed('')
       }
     })
   }
