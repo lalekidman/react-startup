@@ -104,7 +104,7 @@ class Wrapper extends React.Component {
     })
     entityCol.collection('ads').onSnapshot((snap) => {
       this.setState({
-        adsList: snap.docs.map(el => (el.data().avatarUrl))
+        adsList: snap.docs.map(el => (el.data().avatarURL))
       }, () => {
         this.handleAdsDisplay()
       })

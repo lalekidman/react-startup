@@ -25,8 +25,8 @@ import 'bootstrap'
 import 'popper.js'
 window.jQuery = window.$ = $
 require("firebase/firestore");
-// const config = serviceAccount.testing
-const config = serviceAccount.development
+const config = serviceAccount.testing
+// const config = serviceAccount.development
 firebase.initializeApp(config)
 const firestore = firebase.firestore();
 const settings = {timestampsInSnapshots: true};
